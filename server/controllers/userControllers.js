@@ -113,12 +113,13 @@ const changeAvatar = async (req, res, next) => {
 
     const user = await User.findById(req.user.id);
     if (user.avatar) {
-      fs.unlink(path.join(__dirname, "...", "uploads", user.avatar), (err) => {
+      fs.unlink(path.join(__dirname, "..", "uploads", user.avatar), (err) => {
         if (err) {
           return next(new HttpError(err));
         }
       });
     }
+    
     const { avatar } = req.files;
 
     if (avatar.size > 500000) {

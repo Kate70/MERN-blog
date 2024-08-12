@@ -1,17 +1,44 @@
-import React from 'react'
-import { useState } from 'react';
-import { fakePosts } from '../data.js'
+import React from 'react';
+import { useState, useEffect } from 'react';
 import PostItem from '../components/PostItem';
+import Loader from '../components/Loader';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 
 
 const CategoryPosts = () => {
-  const [posts, setPosts] = useState(fakePosts )
+  const [posts, setPosts] = useState({})
+  const [isLoading, setIsloading] = useState(false)
+
+  
+  const { category } = useParams();
+
+  
+
+  
+  useEffect(() => {
+    const featchPosts = async () => {
+      setIsloading(true)
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/posts/categories/${category}`);
+        setPosts(response?.data)
+      } catch (err) {
+        console.log(err);
+        
+      }
+      setIsloading(false)
+    }
+    featchPosts()
+  },[category])
+  if (isLoading) {
+    return<Loader/>
+  }
   return (
-    <section >
+      <section className="posts">
       {posts.length > 0 ? <div className="container posts__container">
         {
-          posts.map(({ id, thumbnail, category, title, desc, authorID }) => <PostItem key={id}
-            postID={id} thumbnail={thumbnail} category={category} title={title} desc={desc} authorID={authorID} />)
+          posts.map(({ _id:id, thumbnail, category, title, description, creator, createdAt }) => <PostItem key={id}
+            postID={id} thumbnail={thumbnail} category={category} title={title} description={description} authorID={creator} createdAt={ createdAt } />)
         }
       </div>: <h2 className='center'> No posts founded</h2>}
     </section>
@@ -19,3 +46,7 @@ const CategoryPosts = () => {
 }
 
 export default CategoryPosts
+
+
+
+

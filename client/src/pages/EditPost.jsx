@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect, useContext} from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; 
+import { useNavigate,useParams } from 'react-router-dom';
+import { UserContext } from '../context/userContext';
+import axios from 'axios';
 
 
 const EditPost = () => {
@@ -8,7 +11,17 @@ const EditPost = () => {
   const [category, setCategory] = useState('Uncategorized');
   const [description, setDescription] = useState('');
   const [thumbnail, setThumbdnail] = useState('');
-
+  const [error, setError] = useState('')
+  const { currentUser } = useContext(UserContext);
+  const token = currentUser?.token;
+  const navigate = useNavigate();
+  const {id}=useParams()
+  
+  useEffect(() => {
+    if (!token) {
+      navigate('/login')
+    }
+  },[])
   const modules = {
     toolbar: [
       [{ 'header':  [1,2, false] }],
@@ -34,13 +47,56 @@ const EditPost = () => {
   "Food",
   "Entertainment",
   "Business",
-  "Sports"]
+    "Sports"]
+  
+  useEffect(() => {
+    const getPost = async() => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/posts/${id}`)
+        setTitle(response.data.title)
+        setDescription(response.data.description)
+        setTitle(response.data.title)
+        setTitle(response.data.title)
+        
+        
+      } catch (error) {
+        console.log(error);
+        
+      }
+    }
+    getPost()
+   
+  },[])
+  const editPost = async (e) => {
+    e.preventDefault();
+
+    const postData = new FormData();
+    postData.set('title', title)
+    postData.set('category', category)
+    postData.set('description', description)
+    postData.set('thumbnail', thumbnail)
+console.log(postData);
+
+    try {
+      const response = await axios.patch(`${process.env.REACT_APP_BASE_URL}/posts/${id}`, postData, { withCredentials: true, headers: { Authorization: `Bearer ${token}` } })
+      console.log(postData);
+      
+      if (response.status == 200) {
+        return navigate('/')
+      }
+      
+    } catch (error) {
+      setError(error.response.data.message);
+      
+    }
+  }
+
   return (
     <section className="create-post">
       <div className="container">
         <h2>Edite Post</h2>
-        <p className="form__error-message">This is an error messs</p>
-        <form action="" className='form form create-post__form'>
+     {error&&<p className="form__error-message">{error}</p>}   
+        <form action="" className='form form create-post__form' onSubmit={editPost}>
           <input type="text" placeholder='Title' value={title } onChange={e=> setTitle(e.target.value)} autoFocus />
           <select name="category" value={category} id="" onChange={e => setCategory(e.target.value)}>
             {

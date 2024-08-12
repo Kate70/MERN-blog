@@ -17,12 +17,13 @@ import CategoryPosts from "./pages/CategoryPosts";
 import Dashboard from "./pages/Dashboard";
 import AuthorPosts from "./pages/AuthorPosts";
 import DeletePost from "./pages/DeletePost"
+import UserProvider from "./context/userContext";
 
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element:<UserProvider><Layout /></UserProvider> ,
     errorElement: <ErrorPage />,
     children: [
       {
